@@ -1,0 +1,63 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environments
+env/
+venv/
+.venv/
+ENV/
+
+# Environment variables / secret files (do NOT commit secrets)
+.env
+.env.*
+.env.local
+*.env
+*.secret
+secrets/
+credentials/
+credentials.json
+
+# Private key / certificate files
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+
+# Local configuration / instance files
+instance/
+config/*.key
+config/*.pem
+config/*.crt
+
+# Databases
+*.sqlite3
+*.sqlite
+*.db
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Unit test / coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
