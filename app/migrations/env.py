@@ -3,12 +3,13 @@ from logging.config import fileConfig
 from sqlalchemy import pool
 from sqlalchemy import engine_from_config
 
+# pyrefly: ignore [missing-import]
 from alembic import context
 
 from app.config.database import Base
 from app.config.settings import settings
 
-from app.models.user import User
+from app.models import User, EmailVerificationToken, PasswordResetToken
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -44,7 +45,7 @@ def run_migrations_offline() -> None:
 
     """
     url = config.get_main_option(
-        "sqlalchemy.url", settings.DATABASE_URL.replace("+asyncpg", "")
+        "sqlalchemy.url", settings.database_url.replace("+asyncpg", "")
     )
     context.configure(
         url=url,
@@ -65,7 +66,7 @@ def run_migrations_online() -> None:
 
     """
     configuration = config.get_section(config.config_ini_section) or {}
-    
+
     sync_db_url = settings.database_url.replace("+asyncpg", "")
     configuration["sqlalchemy.url"] = sync_db_url
     connectable = engine_from_config(
