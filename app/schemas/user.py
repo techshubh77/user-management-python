@@ -1,4 +1,4 @@
-import re
+from app.utils.password_strength import validate_password_strength
 from datetime import datetime
 from pydantic import (
     BaseModel,
@@ -11,18 +11,6 @@ from pydantic import (
 from typing_extensions import Self
 from typing import Optional
 from app.models.user import UserRole
-
-
-def validate_password_strength(value: str) -> str:
-    if not re.search(r"[A-Z]", value):
-        raise ValueError("Password must contain at least one uppercase letter")
-    if not re.search(r"[a-z]", value):
-        raise ValueError("Password must contain at least one lowercase letter")
-    if not re.search(r"\d", value):
-        raise ValueError("Password must contain at least one digit")
-    if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>/?]", value):
-        raise ValueError("Password must contain at least one special character")
-    return value
 
 
 class UserCreate(BaseModel):
@@ -70,7 +58,7 @@ class UserLogin(BaseModel):
 
     password: str = Field(
         min_length=8,
-        max_length=128,
+        max_length=16,
     )
 
 
@@ -80,31 +68,6 @@ class UserUpdate(BaseModel):
         min_length=2,
         max_length=100,
     )
-
-
-class ChangePassword(BaseModel):
-    current_password: str
-
-    new_password: str = Field(
-        min_length=8,
-        max_length=16,
-    )
-
-    confirm_new_password: str = Field(
-        min_length=8,
-        max_length=16,
-    )
-
-    @field_validator("new_password")
-    @classmethod
-    def validate_password(cls, value: str) -> str:
-        return validate_password_strength(value)
-
-    @model_validator(mode="after")
-    def verify_new_password_match(self) -> Self:
-        if self.new_password != self.confirm_new_password:
-            raise ValueError("New passwords do not match")
-        return self
 
 
 class UserResponse(BaseModel):

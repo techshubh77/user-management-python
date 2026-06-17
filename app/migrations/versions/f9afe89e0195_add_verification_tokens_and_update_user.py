@@ -31,7 +31,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index('idx_email_verification_token_lookup', 'email_verification_tokens', ['user_id', 'token'], unique=False)
-    op.create_index(op.f('ix_email_verification_tokens_user_id'), 'email_verification_tokens', ['user_id'], unique=False)
+    op.create_index(op.f('ix_email_verification_tokens_user_id'), 'email_verification_tokens', ['user_id'], unique=True)
     op.create_table('password_reset_tokens',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.String(), nullable=False),
@@ -42,7 +42,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index('idx_password_reset_token_lookup', 'password_reset_tokens', ['user_id', 'token'], unique=False)
-    op.create_index(op.f('ix_password_reset_tokens_user_id'), 'password_reset_tokens', ['user_id'], unique=False)
+    op.create_index(op.f('ix_password_reset_tokens_user_id'), 'password_reset_tokens', ['user_id'], unique=True)
     op.add_column('users', sa.Column('avatar', sa.String(), nullable=True))
     op.alter_column('users', 'is_approved',
             existing_type=sa.BOOLEAN(),

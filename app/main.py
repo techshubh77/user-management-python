@@ -1,4 +1,4 @@
-from contextlib import asynccontextmanager  
+from contextlib import asynccontextmanager
 import sys
 
 import uvicorn
@@ -6,6 +6,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from sqlalchemy import text
+from fastapi.routing import APIRouter
 
 import secure
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -14,6 +15,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from app.config.database import engine
+from app.routes.index import app_routes
 from app.config.settings import settings
 from fastapi.exceptions import RequestValidationError
 from app.exceptions.handlers import (
@@ -36,7 +38,7 @@ async def lifespan(app: FastAPI):
         logger.critical(f"Database connection handshake failed: {e}")
         raise e
 
-    logger.info(f"🚀 Application initialized: {settings.app_name}")
+    logger.info(f"Application initialized: {settings.app_name}")
     logger.info(f"Environment Profile: {settings.env}")
     logger.info(f"Binding network listeners onto port: {settings.port}")
 
@@ -56,10 +58,15 @@ app = FastAPI(
     title=settings.app_name,
     version="1.0.0",
     docs_url="/docs" if settings.env == "development" else None,
-    lifespan=lifespan, 
+    lifespan=lifespan,
 )
 
-# middleware definitions 
+# API Version Router
+api_v1_router = APIRouter(prefix="/api/v1")
+api_v1_router.include_router(app_routes)
+app.include_router(api_v1_router)
+
+# middleware definitions
 # goes from top to bottom : execution goes CORS -> GZip -> SlowAPI -> Secure Headers -> Routes
 
 # Secure Headers
@@ -67,7 +74,7 @@ secure_headers = secure.Secure()
 @app.middleware("http")
 async def set_secure_headers(request: Request, call_next):
     response = await call_next(request)
-    secure_headers.framework.fastapi(response)
+    secure_headers.set_headers(response)
     return response
 
 # GZip Compression

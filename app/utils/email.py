@@ -12,6 +12,7 @@ env = Environment(
     autoescape=select_autoescape(["html", "xml"]),
 )
 
+
 async def send_email(to_email: str, subject: str, html_content: str):
     # Container message
     message = MIMEMultipart("alternative")
@@ -40,11 +41,11 @@ async def send_email(to_email: str, subject: str, html_content: str):
 
 def render_verification_email(name: str, token: str) -> str:
     template = env.get_template("verify_email.html")
-    verify_url = f"{settings.base_url}/api/v1/auth/verify-email/{token}"
+    verify_url = f"{settings.frontend_url}/auth/verify-email/{token}"
     return template.render(name=name, verify_url=verify_url)
 
 
 def render_password_reset_email(name: str, token: str) -> str:
     template = env.get_template("reset_password.html")
-    reset_url = f"{settings.base_url}/api/v1/auth/reset-password/{token}"
+    reset_url = f"{settings.frontend_url}/auth/reset-password/{token}"
     return template.render(name=name, reset_url=reset_url)

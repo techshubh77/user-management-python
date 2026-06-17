@@ -20,6 +20,7 @@ class PasswordResetToken(Base):
     user_id: Mapped[str] = mapped_column(
         String,
         ForeignKey("users.id", ondelete="CASCADE"),
+        unique=True,
         index=True,
         nullable=False,
     )

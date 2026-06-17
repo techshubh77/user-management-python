@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     jwt_secret: str
     access_token_exp_minutes: int = 60
     allowed_origins: str
+    frontend_url: str
 
     mailtrap_host: str
     mailtrap_port: int
@@ -23,8 +24,8 @@ class Settings(BaseSettings):
     mail_from_email: str = "no-reply@usermanagement.com"
 
     model_config = SettingsConfigDict(
-        env_file=".env", 
-        case_sensitive=False, 
+        env_file=".env",
+        case_sensitive=False,
         extra="ignore"
     )
 
