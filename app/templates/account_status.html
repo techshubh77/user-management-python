@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Account Status Update</title>
+</head>
+<body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa;">
+    <div style="background-color: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e9ecef;">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: #2b3a4a; margin: 0; font-size: 24px; font-weight: 600;">Account Status Update</h2>
+        </div>
+        
+        <p style="font-size: 16px; color: #495057;">Hello {{ name }},</p>
+        
+        {% if status == 'approved' %}
+        <div style="background-color: #d4edda; border-left: 5px solid #28a745; color: #155724; padding: 18px; border-radius: 4px; margin: 25px 0; font-size: 15px;">
+            <strong style="font-size: 16px; display: block; margin-bottom: 5px;">🎉 Account Approved!</strong>
+            Your account request has been reviewed and approved by our administration team. You now have full access to your account.
+        </div>
+        
+        <p style="font-size: 15px; color: #495057; margin-bottom: 30px;">You can log in to your account dashboard using the button below:</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{ login_url }}" style="display: inline-block; padding: 14px 28px; background-color: #28a745; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(40,167,69,0.2);">Log In to Your Account</a>
+        </div>
+        {% else %}
+        <div style="background-color: #f8d7da; border-left: 5px solid #dc3545; color: #721c24; padding: 18px; border-radius: 4px; margin: 25px 0; font-size: 15px;">
+            <strong style="font-size: 16px; display: block; margin-bottom: 5px;">⚠️ Account Request Rejected</strong>
+            Unfortunately, your account registration application was not approved by our administration team.
+        </div>
+        
+        <p style="font-size: 15px; color: #495057;">If you believe this decision was made in error, or if you need to submit additional details, please contact our support desk.</p>
+        {% endif %}
+        
+        <hr style="border: 0; border-top: 1px solid #e9ecef; margin: 35px 0;">
+        
+        <p style="font-size: 13px; color: #868e96; line-height: 1.5; margin: 0;">
+            Best regards,<br>
+            <strong>User Management Team</strong>
+        </p>
+    </div>
+</body>
+</html>

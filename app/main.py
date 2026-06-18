@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 import sys
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 import uvicorn
 from fastapi import FastAPI, Request
@@ -22,6 +23,7 @@ from app.exceptions.handlers import (
     app_exception_handler,
     validation_exception_handler,
     global_exception_handler,
+    http_exception_handler
 )
 from app.exceptions.custom_exceptions import AppException
 from app.utils.logger import logger
@@ -101,6 +103,7 @@ app.add_middleware(
 app.add_exception_handler(AppException, app_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(Exception, global_exception_handler)
+app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 
 
 def start_server():

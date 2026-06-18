@@ -11,7 +11,9 @@ from app.models.password_reset_token import PasswordResetToken
 
 from app.exceptions.custom_exceptions import AppException
 from app.utils.email import send_email, render_verification_email, render_password_reset_email
-from app.schemas.user import UserCreate, UserLogin, UserResponse
+from app.schemas.register_schema import RegisterSchema
+from app.schemas.login_schema import LoginSchema
+from app.schemas.user_response_schema import UserResponseSchema
 from app.utils.jwt import create_jwt_token
 from app.schemas.password_schema import ForgotPasswordSchema, ResetPasswordSchema
 from fastapi import BackgroundTasks
@@ -23,7 +25,7 @@ class AuthService:
 
     @staticmethod
     async def register_user(
-        db: AsyncSession, data: UserCreate, background_tasks: BackgroundTasks
+        db: AsyncSession, data: RegisterSchema, background_tasks: BackgroundTasks
     ):
         result = await db.execute(select(User).where(User.email == data.email))
         existing_user = result.scalar_one_or_none()
@@ -106,7 +108,7 @@ class AuthService:
         return user
 
     @staticmethod
-    async def login_user(db: AsyncSession, data: UserLogin):
+    async def login_user(db: AsyncSession, data: LoginSchema):
         email, password = data.email, data.password
 
         result = await db.execute(
@@ -129,7 +131,7 @@ class AuthService:
         if user.is_approved == 2:
             raise AppException("Your account has been rejected. Please contact the administrator.", 403)
 
-        if user.is_active == False:
+        if not user.is_active:
             raise AppException("Your account has been deactivated. Please contact the administrator.", 403)
 
         if user.deleted_at is not None:
@@ -142,7 +144,7 @@ class AuthService:
 
         access_token = create_jwt_token(access_token_payload)
 
-        return {"access_token": access_token, "user": UserResponse.model_validate(user)}
+        return {"access_token": access_token, "user": UserResponseSchema.model_validate(user)}
 
 
     @staticmethod
@@ -155,7 +157,7 @@ class AuthService:
         user = result.scalar_one_or_none()
 
         if not user:
-            raise AppException("User not found.", 404)
+            return  # silent return 
 
         token = secrets.token_hex(32)
 
@@ -185,9 +187,28 @@ class AuthService:
         return True
 
     @staticmethod
-    async def reset_password(db: AsyncSession, data: UserLogin):
-        pass
+    async def reset_password(db: AsyncSession, data: ResetPasswordSchema, token: str):
+        result = await db.execute(
+            select(PasswordResetToken).where(PasswordResetToken.token == token)
+        )
+        token_record = result.scalar_one_or_none()
 
-    @staticmethod
-    async def logout_user(db: AsyncSession, data: UserCreate):
-        pass
+        if not token_record:
+            raise AppException("Invalid or expired password reset token.", 400)
+        if token_record.expires_at < datetime.now(timezone.utc):
+            await db.delete(token_record)
+            await db.commit()
+            raise AppException("Password reset token has expired.", 400)
+
+        user_result = await db.execute(select(User).where(User.id == token_record.user_id))
+        user = user_result.scalar_one_or_none()
+
+        if not user:
+            raise AppException("User not found.", 404)
+
+        user.password = data.password
+
+        await db.delete(token_record)
+        await db.commit()
+        return True
+

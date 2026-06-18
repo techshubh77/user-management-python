@@ -1,17 +1,17 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import BackgroundTasks
 from app.services.auth_service import AuthService
-from app.schemas.user import UserCreate, UserLogin
+from app.schemas.register_schema import RegisterSchema
+from app.schemas.login_schema import LoginSchema
 from app.schemas.password_schema import ForgotPasswordSchema, ResetPasswordSchema
 from app.utils.response import success_response
-from fastapi import Response
 from app.config.settings import settings
 
 
 class AuthController:
     @staticmethod
     async def register(
-        db: AsyncSession, data: UserCreate, background_tasks: BackgroundTasks
+        db: AsyncSession, data: RegisterSchema, background_tasks: BackgroundTasks
     ):
         user = await AuthService.register_user(db, data, background_tasks)
         return success_response(
@@ -34,7 +34,7 @@ class AuthController:
         )
 
     @staticmethod
-    async def login(db: AsyncSession, data: UserLogin):
+    async def login(db: AsyncSession, data: LoginSchema):
         result = await AuthService.login_user(db, data)
 
         res = success_response(
@@ -58,15 +58,28 @@ class AuthController:
     async def forgot_password(db: AsyncSession, data: ForgotPasswordSchema, background_tasks: BackgroundTasks):
         await AuthService.forgot_password(db, data, background_tasks)
         return success_response(
-            message="Password reset link sent successfully.",
+            message="If the email address is registered, you will receive a password reset link.",
             status_code=200,
         )
 
     @staticmethod
-    async def reset_password(db: AsyncSession, data: ResetPasswordSchema):
-        await AuthService.reset_password(db, data)
+    async def reset_password(db: AsyncSession, data: ResetPasswordSchema, token: str):
+        await AuthService.reset_password(db, data, token)
         return success_response(
             message="Password reset successful.",
             status_code=200,
         )
 
+    @staticmethod
+    async def logout():
+        res = success_response(
+            message="Logged out successfully.",
+            status_code=200,
+        )
+        res.delete_cookie(
+            key="token",
+            httponly=True,
+            samesite="lax",
+            secure=settings.env == "production",
+        )
+        return res

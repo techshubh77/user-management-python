@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.controllers.auth_controller import AuthController
-from app.schemas.user import UserCreate, UserLogin
+from app.schemas.register_schema import RegisterSchema
+from app.schemas.login_schema import LoginSchema
 from app.schemas.password_schema import ForgotPasswordSchema, ResetPasswordSchema
 
 # get_db dependency from database config
@@ -13,7 +14,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 # Define the endpoint. The full path will be .../auth/register
 @router.post("/register")
 async def register(
-    data: UserCreate,
+    data: RegisterSchema,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ):
@@ -28,7 +29,7 @@ async def verify_email(
 
 @router.post("/login")
 async def login(
-    data: UserLogin,
+    data: LoginSchema,
     db: AsyncSession = Depends(get_db),
 ):
     return await AuthController.login(db, data)
@@ -47,4 +48,8 @@ async def reset_password(
     data: ResetPasswordSchema,
     db: AsyncSession = Depends(get_db),
 ):
-    return await AuthController.reset_password(db, data)
+    return await AuthController.reset_password(db, data, token)
+
+@router.post("/logout")
+async def logout():
+    return await AuthController.logout()

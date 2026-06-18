@@ -1,7 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models.user import User
-from app.schemas.user import UserCreate, UserLogin, UserResponse
+from app.schemas.register_schema import RegisterSchema
+from app.schemas.login_schema import LoginSchema
+from app.schemas.user_response_schema import UserResponseSchema
 
 
 async def get_user_by_email(
@@ -30,9 +32,9 @@ async def get_user_by_id(
 
 async def create_user(
     db: AsyncSession,
-    data: UserCreate
+    data: RegisterSchema
 ) -> User:
-    
+
     existing_user = await get_user_by_email(
         db=db,
         email=data.email,
@@ -52,3 +54,5 @@ async def create_user(
 
     await db.refresh(user)
     return user
+
+

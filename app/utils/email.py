@@ -49,3 +49,29 @@ def render_password_reset_email(name: str, token: str) -> str:
     template = env.get_template("reset_password.html")
     reset_url = f"{settings.frontend_url}/auth/reset-password/{token}"
     return template.render(name=name, reset_url=reset_url)
+
+
+def render_account_creation_email(name: str, email: str, password: str) -> str:
+    template = env.get_template("account_creation.html")
+    login_url = f"{settings.frontend_url}/auth/login"
+    return template.render(name=name, email=email, password=password, login_url=login_url)
+
+
+async def send_account_creation_email(name: str, email: str, password: str) -> None:
+    subject = "Your Account Has Been Created"
+    html_content = render_account_creation_email(name, email, password)
+    await send_email(email, subject, html_content)
+
+
+def render_account_status_email(name: str, status: str) -> str:
+    template = env.get_template("account_status.html")
+    login_url = f"{settings.frontend_url}/auth/login"
+    return template.render(name=name, status=status, login_url=login_url)
+
+
+async def send_account_status_email(name: str, email: str, status: str) -> None:
+    subject = f"Account Registration {status.capitalize()}"
+    html_content = render_account_status_email(name, status)
+    await send_email(email, subject, html_content)
+
+
