@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import event
+from sqlalchemy import event, true
 from sqlalchemy.orm import ORMExecuteState, with_loader_criteria, Session
 
 
@@ -31,9 +31,10 @@ def _add_soft_delete_filter(execute_state: ORMExecuteState):
             execute_state.statement = execute_state.statement.options(
                 with_loader_criteria(
                     Base,
-                    # Dynamically check if the model has a deleted_at column
                     lambda cls: (
-                        cls.deleted_at.is_(None) if hasattr(cls, "deleted_at") else None
+                        cls.deleted_at.is_(None)
+                        if hasattr(cls, "deleted_at")
+                        else true()
                     ),
                     include_aliases=True,
                 )

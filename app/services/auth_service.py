@@ -17,6 +17,7 @@ from app.schemas.user_response_schema import UserResponseSchema
 from app.utils.jwt import create_jwt_token
 from app.schemas.password_schema import ForgotPasswordSchema, ResetPasswordSchema
 from fastapi import BackgroundTasks
+from app.utils.avatar import generate_random_avatar
 
 
 class AuthService:
@@ -33,10 +34,13 @@ class AuthService:
         if existing_user:
             raise AppException("Email is already registered.", 400)
 
+        avatar_name = await generate_random_avatar(data.name)
+
         user = User(
             name=data.name,
             email=data.email,
             password=data.password,
+            avatar=avatar_name
         )
 
         db.add(user)
@@ -80,11 +84,9 @@ class AuthService:
 
     @staticmethod
     async def verify_email(db: AsyncSession, token: str):
-        result = await db.execute(
-            select(EmailVerificationToken).where(EmailVerificationToken.token == token)
-        )
+        stmt = select(EmailVerificationToken).where(EmailVerificationToken.token == token)
+        result = await db.execute(stmt)
         token_record = result.scalar_one_or_none()
-
         if not token_record:
             raise AppException("Invalid or expired verification token.", 400)
 
@@ -157,7 +159,7 @@ class AuthService:
         user = result.scalar_one_or_none()
 
         if not user:
-            return  # silent return 
+            return  # silent return
 
         token = secrets.token_hex(32)
 

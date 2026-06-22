@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     access_token_exp_minutes: int = 60
     allowed_origins: str
     frontend_url: str
+    celery_broker_url: str
 
     mailtrap_host: str
     mailtrap_port: int
